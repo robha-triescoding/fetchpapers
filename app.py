@@ -5,15 +5,22 @@ from google import genai
 import time
 from fpdf import FPDF
 import io
+import json
+import os
+import requests
+import base64
 
 # --- STREAMLIT CONFIGURATION ---
 st.set_page_config(page_title="PubMed Research Assistant", page_icon="🔬", layout="wide")
 
-# --- SECRETS MANAGEMENT ---
+# --- SECRETS & CONFIG ---
 try:
     ENTREZ_EMAIL = st.secrets["ENTREZ_EMAIL"]
     ENTREZ_API_KEY = st.secrets["ENTREZ_API_KEY"]
     GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+    # Optional for saving settings back to GitHub
+    GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN")
+    GITHUB_REPO = st.secrets.get("GITHUB_REPO") # format: "username/repo"
     
     Entrez.email = ENTREZ_EMAIL
     Entrez.api_key = ENTREZ_API_KEY
@@ -21,6 +28,41 @@ try:
 except Exception as e:
     st.error("Missing configuration! Please ensure ENTREZ_EMAIL, ENTREZ_API_KEY, and GEMINI_API_KEY are set in Streamlit secrets.")
     st.stop()
+
+# Load default config from file
+def load_config():
+    try:
+        with open("config.json", "r") as f:
+            return json.load(f)
+    except:
+        return {
+            "search_query": '(("Adipose Tissue"[Title/Abstract] OR "Adipocytes"[Title/Abstract]) AND "Obesity"[Title/Abstract]) AND hasabstract[text]',
+            "days_back": 7,
+            "max_results": 5
+        }
+
+# Save config to GitHub (since Streamlit Cloud is read-only)
+def save_config_to_github(new_config):
+    if not GITHUB_TOKEN or not GITHUB_REPO:
+        st.warning("GITHUB_TOKEN and GITHUB_REPO not found in secrets. Settings saved for this session only.")
+        return False
+    
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/config.json"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    
+    # Get current file sha
+    r = requests.get(url, headers=headers)
+    sha = r.json().get("sha") if r.status_code == 200 else None
+    
+    content = base64.b64encode(json.dumps(new_config, indent=4).encode()).decode()
+    data = {
+        "message": "Update search settings via Streamlit UI",
+        "content": content,
+        "sha": sha
+    }
+    
+    r = requests.put(url, headers=headers, json=data)
+    return r.status_code in [200, 201]
 
 # --- FUNCTIONS ---
 
@@ -165,16 +207,41 @@ def create_pdf(paper_details):
 st.title("🔬 PubMed Research Assistant")
 st.markdown("Fetch the latest research and get AI-powered summaries instantly.")
 
+# Load initial config
+current_config = load_config()
+
 # Initialize session state for papers
 if 'analyzed_papers' not in st.session_state:
-    st.session_state.analyzed_papers = []
+    # Try to load last automated results
+    try:
+        with open("results.json", "r") as f:
+            st.session_state.analyzed_papers = json.load(f)
+            st.info(f"Loaded {len(st.session_state.analyzed_papers)} papers from the last automated fetch.")
+    except:
+        st.session_state.analyzed_papers = []
 
 with st.sidebar:
     st.header("Search Parameters")
-    search_query = st.text_area("Search Query", value='(("Adipose Tissue"[Title/Abstract] OR "Adipocytes"[Title/Abstract]) AND "Obesity"[Title/Abstract]) AND hasabstract[text]')
-    days_back = st.slider("Days Back", 1, 30, 7)
-    max_results = st.slider("Max Results", 1, 20, 5)
-    fetch_button = st.button("Fetch & Analyze", type="primary")
+    search_query = st.text_area("Search Query", value=current_config['search_query'])
+    days_back = st.slider("Days Back", 1, 30, current_config['days_back'])
+    max_results = st.slider("Max Results", 1, 20, current_config['max_results'])
+    
+    col_fetch, col_save = st.columns(2)
+    with col_fetch:
+        fetch_button = st.button("Fetch Now", type="primary", use_container_width=True)
+    with col_save:
+        save_button = st.button("Set as Default", use_container_width=True, help="Saves these settings for the Sunday night automated fetch.")
+
+if save_button:
+    new_config = {
+        "search_query": search_query,
+        "days_back": days_back,
+        "max_results": max_results
+    }
+    if save_config_to_github(new_config):
+        st.sidebar.success("Settings saved! GitHub will use these on Sunday night.")
+    else:
+        st.sidebar.error("Could not save to GitHub. Check your secrets.")
 
 if fetch_button:
     with st.spinner("Searching PubMed..."):
