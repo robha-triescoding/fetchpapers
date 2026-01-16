@@ -1,0 +1,4 @@
+streamlit
+biopython
+google-genai
+fpdf2
