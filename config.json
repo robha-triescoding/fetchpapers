@@ -1,5 +1,12 @@
 {
-    "search_query": "((\"Adipose Tissue\"[Title/Abstract] OR \"Adipocytes\"[Title/Abstract]) AND \"Obesity\"[Title/Abstract]) AND hasabstract[text]",
-    "days_back": 7,
-    "max_results": 10
+    "search_sets": [
+        {
+            "id": "adipose_obesity",
+            "name": "Adipose Tissue in Obesity",
+            "query": "((\"Adipose Tissue\"[Title/Abstract] OR \"Adipocytes\"[Title/Abstract]) AND \"Obesity\"[Title/Abstract]) AND hasabstract[text]",
+            "days_back": 7,
+            "max_results": 5,
+            "schedule_day": "Sunday"
+        }
+    ]
 }
