@@ -11,10 +11,10 @@
         {
             "id": "gpx3_in_obesity/adipose",
             "name": "GPx3 in Obesity/Adipose",
-            "query": "",
+            "query": "((((GPX3[Title/Abstract] AND adipocytes[Title/Abstract]) OR \"adipose tissue\"[Title/Abstract]) AND obesity[Title/Abstract])) AND hasabstract[text]",
             "days_back": 7,
             "max_results": 5,
-            "schedule_day": "Sunday"
+            "schedule_day": "Monday"
         }
     ]
 }
