@@ -292,8 +292,8 @@ with st.sidebar:
         
         if selected_set_name == "+ Add New Set":
             new_set_name = st.text_input("New Set Name", placeholder="e.g. Redox Regulation")
-                if st.button("Create Set", use_container_width=True):
-                    if new_set_name:
+            if st.button("Create Set", use_container_width=True):
+                if new_set_name:
                         new_id = new_set_name.lower().replace(" ", "_")
                         st.session_state.config['search_sets'].append({
                             "id": new_id,
