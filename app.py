@@ -209,13 +209,12 @@ def create_pdf(paper_details):
     
     # Add Unicode-capable font
     try:
-        # Using DejaVuSans from a reliable source for broad Unicode support
-        # DejaVuSans is better for Greek/Scientific characters than Roboto in some FPDF2 environments
-        base_url = "https://github.com/reingart/pyfpdf/raw/master/font/"
-        pdf.add_font("DejaVu", style="", fname=base_url + "DejaVuSans.ttf")
-        pdf.add_font("DejaVu", style="B", fname=base_url + "DejaVuSans-Bold.ttf")
-        pdf.add_font("DejaVu", style="I", fname=base_url + "DejaVuSans-Oblique.ttf")
-        font_name = "DejaVu"
+        # Using Roboto from a reliable CDN that provides raw TTF files
+        # These URLs are direct links to the raw font files
+        pdf.add_font("Roboto", style="", fname="https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Regular.ttf")
+        pdf.add_font("Roboto", style="B", fname="https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Bold.ttf")
+        pdf.add_font("Roboto", style="I", fname="https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Italic.ttf")
+        font_name = "Roboto"
     except Exception as e:
         # Fallback to Helvetica if font loading fails
         st.warning(f"Could not load Unicode font, falling back to Helvetica. Special characters may not display correctly. Error: {e}")
