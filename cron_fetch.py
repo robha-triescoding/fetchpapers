@@ -29,7 +29,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 def run_automated_fetch(set_id=None, day_of_week=None):
     # 1. Load Config
     try:
-        with open("config.json", "r") as f:
+        with open("config.json", "r", encoding='utf-8') as f:
             config_data = json.load(f)
     except Exception as e:
         print(f"Error loading config.json: {e}")
@@ -121,8 +121,8 @@ def run_automated_fetch(set_id=None, day_of_week=None):
         # Sanitize set_id just in case old configs have invalid characters
         safe_id = "".join([c if c.isalnum() or c in ('-', '_') else '_' for c in s_set['id']])
         results_filename = f"results_{safe_id}.json"
-        with open(results_filename, "w") as f:
-            json.dump(papers, f, indent=4)
+        with open(results_filename, "w", encoding='utf-8') as f:
+            json.dump(papers, f, indent=4, ensure_ascii=False)
         print(f"Successfully saved {len(papers)} papers to {results_filename}")
 
 if __name__ == "__main__":
