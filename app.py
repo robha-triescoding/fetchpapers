@@ -208,12 +208,26 @@ def create_pdf(paper_details):
     pdf.set_auto_page_break(auto=True, margin=15)
     
     # Add Unicode-capable font
+    font_name = "helvetica"
     try:
-        # Using Roboto from a reliable CDN that provides raw TTF files
-        # These URLs are direct links to the raw font files
-        pdf.add_font("Roboto", style="", fname="https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Regular.ttf")
-        pdf.add_font("Roboto", style="B", fname="https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Bold.ttf")
-        pdf.add_font("Roboto", style="I", fname="https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Italic.ttf")
+        # Use a more robust way to load fonts by downloading them to a local temp path
+        # this avoids issues with fpdf2 not handling certain URL types or redirects
+        fonts = {
+            "Roboto-Regular.ttf": "https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Regular.ttf",
+            "Roboto-Bold.ttf": "https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Bold.ttf",
+            "Roboto-Italic.ttf": "https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Italic.ttf"
+        }
+        
+        for name, url in fonts.items():
+            if not os.path.exists(name):
+                resp = requests.get(url, timeout=10)
+                if resp.status_code == 200:
+                    with open(name, "wb") as f:
+                        f.write(resp.content)
+        
+        pdf.add_font("Roboto", style="", fname="Roboto-Regular.ttf")
+        pdf.add_font("Roboto", style="B", fname="Roboto-Bold.ttf")
+        pdf.add_font("Roboto", style="I", fname="Roboto-Italic.ttf")
         font_name = "Roboto"
     except Exception as e:
         # Fallback to Helvetica if font loading fails
