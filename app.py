@@ -207,32 +207,29 @@ def create_pdf(paper_details):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     
-    # Add Unicode-capable font
+    # Add Unicode-capable font (Roboto) from the repository
     font_name = "helvetica"
     try:
-        # Use a more robust way to load fonts by downloading them to a local temp path
-        import tempfile
-        
-        fonts = {
-            "Roboto-Regular.ttf": "https://github.com/google/fonts/raw/main/apache/roboto/static/Roboto-Regular.ttf",
-            "Roboto-Bold.ttf": "https://github.com/google/fonts/raw/main/apache/roboto/static/Roboto-Bold.ttf",
-            "Roboto-Italic.ttf": "https://github.com/google/fonts/raw/main/apache/roboto/static/Roboto-Italic.ttf"
-        }
-        
-        temp_dir = tempfile.gettempdir()
-        
-        for name, url in fonts.items():
-            fpath = os.path.join(temp_dir, name)
-            if not os.path.exists(fpath):
-                resp = requests.get(url, timeout=10)
-                if resp.status_code == 200:
-                    with open(fpath, "wb") as f:
-                        f.write(resp.content)
-        
-        pdf.add_font("Roboto", style="", fname=os.path.join(temp_dir, "Roboto-Regular.ttf"))
-        pdf.add_font("Roboto", style="B", fname=os.path.join(temp_dir, "Roboto-Bold.ttf"))
-        pdf.add_font("Roboto", style="I", fname=os.path.join(temp_dir, "Roboto-Italic.ttf"))
-        font_name = "Roboto"
+        # Check if fonts exist in the repository root
+        if os.path.exists("Roboto-Regular.ttf") and os.path.exists("Roboto-Bold.ttf") and os.path.exists("Roboto-Italic.ttf"):
+            pdf.add_font("Roboto", style="", fname="Roboto-Regular.ttf")
+            pdf.add_font("Roboto", style="B", fname="Roboto-Bold.ttf")
+            pdf.add_font("Roboto", style="I", fname="Roboto-Italic.ttf")
+            font_name = "Roboto"
+        else:
+            # Try a slightly more robust path check for different environments
+            base_path = os.path.dirname(__file__) if "__file__" in locals() else os.getcwd()
+            reg_path = os.path.join(base_path, "Roboto-Regular.ttf")
+            bold_path = os.path.join(base_path, "Roboto-Bold.ttf")
+            ital_path = os.path.join(base_path, "Roboto-Italic.ttf")
+            
+            if os.path.exists(reg_path):
+                pdf.add_font("Roboto", style="", fname=reg_path)
+                pdf.add_font("Roboto", style="B", fname=bold_path)
+                pdf.add_font("Roboto", style="I", fname=ital_path)
+                font_name = "Roboto"
+            else:
+                raise FileNotFoundError("Roboto TTF files not found in repository root.")
     except Exception as e:
         # Fallback to Helvetica if font loading fails
         st.warning(f"Could not load Unicode font, falling back to Helvetica. Special characters may not display correctly. Error: {e}")
