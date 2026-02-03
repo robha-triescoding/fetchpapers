@@ -3,18 +3,27 @@
         {
             "id": "adipose_obesity",
             "name": "Adipose Tissue in Obesity",
-            "query": "((\"Adipose Tissue\"[Title/Abstract] OR \"Adipocytes\"[Title/Abstract]) AND \"Obesity\"[Title/Abstract]) AND hasabstract[text]",
+            "query": "((\"Adipose Tissue\"[tiab] OR \"Adipocytes\"[tiab]) AND \"Obesity\"[tiab]) AND hasabstract[text]",
+            "days_back": 7,
+            "max_results": 5,
+            "schedule_day": "Friday"
+        },
+        {
+            "id": "wider_redox_adipose",
+            "name": "Wider Redox Context in Adipose",
+            "query": "(\"glutathione peroxidase\"[tiab] OR \"oxidative stress\"[tiab] OR \"reactive oxygen species\"[tiab] OR \"antioxidant response\"[tiab]) AND (\"adipose tissue\"[tiab] OR adipocytes[tiab]) AND obesity[tiab] AND hasabstract[text]",
             "days_back": 7,
             "max_results": 5,
             "schedule_day": "Saturday"
         },
         {
-            "id": "gpx3_in_obesity/adipose",
+            "id": "gpx3_in_obesity_adipose",
             "name": "GPx3 in Obesity/Adipose",
-            "query": "GPX3[tiab] AND (adipocytes[tiab] OR "adipose tissue"[tiab] OR obesity[tiab] OR overweight[tiab]) AND hasabstract[text]",
+            "query": "GPX3[tiab] AND (adipocytes[tiab] OR \"adipose tissue\"[tiab] OR obesity[tiab] OR overweight[tiab]) AND hasabstract[text]",
             "days_back": 7,
             "max_results": 5,
-            "schedule_day": "Monday"
+            "schedule_day": "Sunday"
         }
     ]
 }
+
